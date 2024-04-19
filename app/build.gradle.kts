@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.ezper.advweek4160421030"
+    namespace = "com.ezper.advuts160421030"
     compileSdk = 34
 
     buildFeatures{
@@ -13,7 +13,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.ezper.advweek4160421030"
+        applicationId = "com.ezper.advuts160421030"
         minSdk = 34
         targetSdk = 34
         versionCode = 1

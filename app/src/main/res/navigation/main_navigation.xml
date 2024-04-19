@@ -3,29 +3,49 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main_navigation"
-    app:startDestination="@id/studentListFragment">
+    app:startDestination="@id/itemHome">
 
     <fragment
-        android:id="@+id/studentListFragment"
-        android:name="com.ezper.advweek4160421030.view.StudentListFragment"
-        android:label="fragment_student_list"
-        tools:layout="@layout/fragment_student_list" >
+        android:id="@+id/itemHome"
+        android:name="com.ezper.advuts160421030.view.NewsListFragment"
+        android:label="fragment_news_list"
+        tools:layout="@layout/fragment_home">
         <action
-            android:id="@+id/actionStudentDetailFragment"
-            app:destination="@id/studentDetailFragment" />
+            android:id="@+id/action_newsListFragment_to_newsDetailFragment"
+            app:destination="@id/newsDetailFragment" />
     </fragment>
     <fragment
-        android:id="@+id/studentDetailFragment"
-        android:name="com.ezper.advweek4160421030.view.StudentDetailFragment"
-        android:label="fragment_student_detail"
-        tools:layout="@layout/fragment_student_detail" >
+        android:id="@+id/newsDetailFragment"
+        android:name="com.ezper.advuts160421030.view.NewsDetailFragment"
+        android:label="fragment_news_detail"
+        tools:layout="@layout/fragment_news_detail">
         <argument
-            android:name="student_id"
-            app:argType="string" />
+            android:name="title"
+            app:argType="string"
+            app:nullable="true"/>
+        <argument
+            android:name="author"
+            app:argType="string"
+            app:nullable="true"/>
+        <argument
+            android:name="url"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="id"
+            app:argType="integer" />
+        <action
+            android:id="@+id/action_newsDetailFragment_to_newsListFragment"
+            app:destination="@id/itemHome" />
     </fragment>
     <fragment
-        android:id="@+id/movieListFragment"
-        android:name="com.ezper.advweek4160421030.view.MovieListFragment"
-        android:label="fragment_movie_list"
-        tools:layout="@layout/fragment_movie_list" />
+        android:id="@+id/itemHistory"
+        android:name="com.ezper.advuts160421030.view.HistoryFragment"
+        android:label="fragment_history"
+        tools:layout="@layout/fragment_history" />
+    <fragment
+        android:id="@+id/itemProfile"
+        android:name="com.ezper.advuts160421030.view.ProfileFragment"
+        android:label="fragment_profile"
+        tools:layout="@layout/fragment_profile" />
 </navigation>
