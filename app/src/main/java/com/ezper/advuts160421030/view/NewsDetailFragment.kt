@@ -63,6 +63,7 @@ class NewsDetailFragment : Fragment() {
             var page = 0
             binding.txtSubtitle.text = detail[page].subtitle
             binding.txtIsi.text = detail[page].isi
+            binding.txtPage.text = detail[page].page.toString() + " / " + detail.size.toString()
 
             if (detail.size>1){
                 binding.btnNext.isEnabled=true
@@ -75,6 +76,7 @@ class NewsDetailFragment : Fragment() {
                 }
                 binding.txtSubtitle.text = detail[page].subtitle
                 binding.txtIsi.text = detail[page].isi
+                binding.txtPage.text = detail[page].page.toString() + " / " + detail.size.toString()
             }
             binding.btnNext.setOnClickListener {
                 binding.btnPrev.isEnabled=true
@@ -84,6 +86,7 @@ class NewsDetailFragment : Fragment() {
                 }
                 binding.txtSubtitle.text = detail[page].subtitle
                 binding.txtIsi.text = detail[page].isi
+                binding.txtPage.text = detail[page].page.toString() + " / " + detail.size.toString()
             }
         })
 
