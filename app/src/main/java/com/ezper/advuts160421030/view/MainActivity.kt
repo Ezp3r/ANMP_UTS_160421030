@@ -40,7 +40,7 @@ class MainActivity : AppCompatActivity() {
         navController = (supportFragmentManager.findFragmentById(R.id.navHome) as NavHostFragment).navController
         val appBarConfig = AppBarConfiguration(setOf(
             R.id.itemHome,
-            R.id.itemHistory,
+            R.id.itemCreate,
             R.id.itemProfile
         ))
         val toolbar = Toolbar(applicationContext)

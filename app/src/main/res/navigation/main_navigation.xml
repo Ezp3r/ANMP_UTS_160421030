@@ -27,10 +27,10 @@
             app:destination="@id/itemHome" />
     </fragment>
     <fragment
-        android:id="@+id/itemHistory"
-        android:name="com.ezper.advuts160421030.view.HistoryFragment"
-        android:label="fragment_history"
-        tools:layout="@layout/fragment_history" />
+        android:id="@+id/itemCreate"
+        android:name="com.ezper.advuts160421030.view.CreateFragment"
+        android:label="fragment_create"
+        tools:layout="@layout/fragment_create" />
     <fragment
         android:id="@+id/itemProfile"
         android:name="com.ezper.advuts160421030.view.ProfileFragment"

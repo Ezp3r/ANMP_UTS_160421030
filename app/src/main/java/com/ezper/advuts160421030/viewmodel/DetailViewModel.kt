@@ -16,7 +16,7 @@ class DetailNewsViewModel(application: Application)
     private val job = Job()
     val newsLD = MutableLiveData<News>()
 
-    fun addTodo(list: List<News>) {
+    fun addNews(list: List<News>) {
         launch {
             val db = buildDB(getApplication())
 
