@@ -16,69 +16,61 @@ import com.ezper.advuts160421030.databinding.FragmentLoginBinding
 import com.ezper.advuts160421030.viewmodel.ListViewModel
 
 class NewsListFragment : Fragment() {
-    private lateinit var binding:FragmentHomeBinding
+    private lateinit var binding: FragmentHomeBinding
     private lateinit var viewModel: ListViewModel
     private val newsListAdapter  = NewsListAdapter(arrayListOf())
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        binding = FragmentHomeBinding.inflate(inflater, container, false)
-        return binding.root
+        binding = FragmentHomeBinding.inflate(inflater,container,false)
+        return  binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        var sharedFile = "com.ezper.advuts160421030"
-        var shared: SharedPreferences = this.requireContext().getSharedPreferences(sharedFile, Context.MODE_PRIVATE)
-        var editor: SharedPreferences.Editor = shared.edit()
-        var nama_depan = shared.getString("nama_depan","")
-        var nama_belakang = shared.getString("nama_belakang","")
-        binding.txtWelcome.setText("Welcome, " +nama_depan+" "+nama_belakang)
-
         viewModel = ViewModelProvider(this).get(ListViewModel::class.java)
         viewModel.refresh()
-
         binding.recView.layoutManager = LinearLayoutManager(context)
         binding.recView.adapter = newsListAdapter
+
         observeViewModel()
-
-        binding.refreshLayout.setOnRefreshListener {
-            binding.recView.visibility = View.GONE
-            binding.txtError.visibility = View.GONE
-            binding.progressLoad.visibility = View.VISIBLE
-            viewModel.refresh()
-            binding.refreshLayout.isRefreshing = false
-        }
-
-
     }
 
     fun observeViewModel() {
         viewModel.newsLD.observe(viewLifecycleOwner, Observer {
             newsListAdapter.updateNewsList(it)
-        })
-        viewModel.newsLoadErrorLD.observe(viewLifecycleOwner, Observer {
-            if (it == true) {
-                binding.txtError?.visibility = View.VISIBLE
+            if(it.isEmpty()) {
+                binding.recView?.visibility = View.GONE
+                binding.txtError.setText("No News Available")
             } else {
-                binding.txtError?.visibility = View.GONE
+                binding.recView?.visibility = View.VISIBLE
             }
         })
+
         viewModel.loadingLD.observe(viewLifecycleOwner, Observer {
-            if(it == true) {
-                binding.recView.visibility = View.GONE
-                binding.progressLoad.visibility = View.VISIBLE
+            if(it == false) {
+                binding.progressLoad?.visibility = View.GONE
             } else {
-                binding.recView.visibility = View.VISIBLE
-                binding.progressLoad.visibility = View.GONE
+                binding.progressLoad?.visibility = View.VISIBLE
             }
         })
+
+        viewModel.newsLoadErrorLD.observe(viewLifecycleOwner, Observer {
+            if(it == false) {
+                binding.txtError?.visibility = View.GONE
+            } else {
+                binding.txtError?.visibility = View.VISIBLE
+            }
+        })
+
+
     }
-
-
-
 }

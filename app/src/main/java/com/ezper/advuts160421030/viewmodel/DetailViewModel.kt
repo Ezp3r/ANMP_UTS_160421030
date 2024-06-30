@@ -1,57 +1,38 @@
 package com.ezper.advuts160421030.viewmodel
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
-import com.android.volley.Request
-import com.android.volley.RequestQueue
-import com.android.volley.toolbox.StringRequest
-import com.android.volley.toolbox.Volley
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
-import com.ezper.advuts160421030.model.Berita
-import com.ezper.advuts160421030.model.Detail
+import com.example.hobbyapp.util.buildDB
+import com.ezper.advuts160421030.model.News
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.Dispatchers
 
-class DetailViewModel(application: Application): AndroidViewModel(application) {
-    val detailLD = MutableLiveData<ArrayList<Detail>>()
-    val detailLoadErrorLD = MutableLiveData<Boolean>()
-    val loadingLD = MutableLiveData<Boolean>()
+class DetailNewsViewModel(application: Application)
+    : AndroidViewModel(application), CoroutineScope {
+    private val job = Job()
+    val newsLD = MutableLiveData<News>()
 
-    val TAG = "volleyTag"
-    private var queue:RequestQueue? = null
+    fun addTodo(list: List<News>) {
+        launch {
+            val db = buildDB(getApplication())
 
-    fun fetch(id:String) {
-        loadingLD.value = true
-        detailLoadErrorLD.value = false
+            db.newsDao().insertAll(*list.toTypedArray())
+        }
+    }
+    override val coroutineContext: CoroutineContext
+        get() = job + Dispatchers.IO
 
-        queue = Volley.newRequestQueue(getApplication())
-        val url = "http://10.0.2.2/news/news_detail.php?news_id=$id"
-
-        val stringRequest = StringRequest(
-            Request.Method.GET, url,
-            {
-                val sType = object : TypeToken<List<Detail>>() { }.type
-                val result = Gson().fromJson<List<Detail>>(it, sType)
-                detailLD.value = result as ArrayList<Detail>?
-                loadingLD.value = false
-                Log.d("showvoley", it)
-            },
-            {
-                Log.d("showvoley", it.toString())
-                detailLoadErrorLD.value = false
-                loadingLD.value = false
-            })
-
-
-        stringRequest.tag = TAG
-        queue?.add(stringRequest)
-
+    fun fetch(id:Int) {
+        launch {
+            val db = buildDB(getApplication())
+            newsLD.postValue(db.newsDao().selectNews(id))
+        }
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        queue?.cancelAll(TAG)
-    }
+
 
 }

@@ -9,42 +9,38 @@ import com.android.volley.Request
 import com.android.volley.RequestQueue
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
+import com.example.hobbyapp.util.buildDB
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.ezper.advuts160421030.model.Berita
+import com.ezper.advuts160421030.model.News
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlin.coroutines.CoroutineContext
 
-class ListViewModel(application: Application): AndroidViewModel(application) {
-    val newsLD = MutableLiveData<ArrayList<Berita>>()
+class ListViewModel(application: Application)
+    : AndroidViewModel(application), CoroutineScope {
+
+    val newsLD = MutableLiveData<List<News>>()
     val newsLoadErrorLD = MutableLiveData<Boolean>()
     val loadingLD = MutableLiveData<Boolean>()
-    val TAG = "volleyTag"
-    private var queue:RequestQueue? = null
+    private var job = Job()
+
+    override val coroutineContext: CoroutineContext
+        get() = job + Dispatchers.IO
 
     fun refresh() {
         loadingLD.value = true
         newsLoadErrorLD.value = false
+        launch {
+            val db = buildDB(getApplication())
 
-        queue = Volley.newRequestQueue(getApplication())
-        val url = "http://10.0.2.2/news/news.php"
-
-        val stringRequest = StringRequest(
-            Request.Method.GET, url,
-            {
-                val sType = object : TypeToken<List<Berita>>() { }.type
-                val result = Gson().fromJson<List<Berita>>(it, sType)
-                newsLD.value = result as ArrayList<Berita>?
-                loadingLD.value = false
-                Log.d("showvoley", it)
-            },
-            {
-                Log.d("showvoley", it.toString())
-                newsLoadErrorLD.value = false
-                loadingLD.value = false
-            })
-
-        stringRequest.tag = TAG
-        queue?.add(stringRequest)
-
+            newsLD.postValue(db.newsDao().selectAllNews())
+            loadingLD.postValue(false)
+        }
     }
+
+
 
 }

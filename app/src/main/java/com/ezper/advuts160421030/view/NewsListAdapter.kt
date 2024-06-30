@@ -4,67 +4,63 @@
     import android.view.LayoutInflater
     import android.view.View
     import android.view.ViewGroup
+    import android.widget.ImageView
     import androidx.navigation.Navigation
     import androidx.recyclerview.widget.RecyclerView
     import com.squareup.picasso.Callback
     import com.squareup.picasso.Picasso
     import com.ezper.advuts160421030.databinding.NewsItemBinding
-    import com.ezper.advuts160421030.model.Berita
+    import com.ezper.advuts160421030.model.News
 
-    class NewsListAdapter(val newsList:ArrayList<Berita>)
-        :RecyclerView.Adapter<NewsListAdapter.NewsViewHolder>()
+    class NewsListAdapter(val newsList: ArrayList<News>): RecyclerView.Adapter<NewsListAdapter.ListViewHolder>(), NewsDetailClick
+
     {
-        class NewsViewHolder(var binding: NewsItemBinding): RecyclerView.ViewHolder(binding.root)
+        class ListViewHolder(var view: NewsItemBinding): RecyclerView.ViewHolder(view.root)
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NewsViewHolder {
-            val binding = NewsItemBinding.inflate(
-                LayoutInflater.from(parent.context), parent, false)
-            return NewsViewHolder(binding)
-
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ListViewHolder {
+            var view = NewsItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+            return ListViewHolder(view)
         }
 
         override fun getItemCount(): Int {
             return newsList.size
         }
 
-        override fun onBindViewHolder(holder: NewsViewHolder, position: Int) {
-            holder.binding.txtTitle.text = newsList[position].title
-            holder.binding.txtAuthor.text = "@" + newsList[position].author
-            holder.binding.txtIsi.text = newsList[position].description
+        override fun onBindViewHolder(holder: ListViewHolder, position: Int) {
 
-            holder.binding.btnRead.setOnClickListener {
-                val action = NewsListFragmentDirections.actionNewsListFragmentToNewsDetailFragment(
-                    newsList[position].title,
-                    newsList[position].author,
-                    newsList[position].url,
-                    newsList[position].id
-                )
-                Navigation.findNavController(it).navigate(action)
-            }
+            holder.view.news = newsList[position]
+            holder.view.detailListener = this
+            load_picture(holder.itemView, newsList[position].url, holder.view.imageView )
+        }
 
-            val picasso = Picasso.Builder(holder.itemView.context)
+        fun load_picture(view: View, photo: String, imageView: ImageView) {
+            val picasso = Picasso.Builder(view.context)
             picasso.listener { picasso, uri, exception ->
                 exception.printStackTrace()
             }
-            picasso.build().load(newsList[position].url).into(holder.binding.imageView, object :
-                Callback {
-                override fun onSuccess() {
-                    holder.binding.progressLoadImg.visibility = View.INVISIBLE
-                    holder.binding.imageView.visibility = View.VISIBLE
-                }
+            picasso.build().load(photo)
+                .into(imageView, object : Callback {
+                    override fun onSuccess() {
+                        imageView.visibility = View.VISIBLE
+                    }
 
-                override fun onError(e: Exception?) {
-                    Log.e("picasso_error", e.toString())
-                }
-
-            })
+                    override fun onError(e: Exception?) {
+                        Log.d("picasso error", e.toString())
+                    }
+                })
         }
 
-
-        fun updateNewsList(newNewsList: ArrayList<Berita>) {
+        fun updateNewsList(newNewsList: List<News>) {
             newsList.clear()
             newsList.addAll(newNewsList)
             notifyDataSetChanged()
         }
 
+
+        override fun onNewsDetailClick(v: View) {
+            val id = v.tag.toString().toInt()
+            val action = NewsListFragmentDirections.actionNewsListFragmentToNewsDetailFragment(id)
+
+            Navigation.findNavController(v).navigate(action)
+        }
     }

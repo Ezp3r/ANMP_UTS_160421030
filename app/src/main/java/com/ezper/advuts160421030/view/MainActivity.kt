@@ -2,40 +2,61 @@ package com.ezper.advuts160421030.view
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import androidx.core.app.NotificationCompat
 import com.ezper.advuts160421030.R
 import com.ezper.advuts160421030.databinding.ActivityMainBinding
-import android.Manifest
-import android.content.pm.PackageManager
-import android.util.Log
-import androidx.core.app.ActivityCompat
-import androidx.core.app.NotificationManagerCompat
+import android.app.Activity
+import android.content.Context
+import android.content.Intent
+import android.content.SharedPreferences
+import androidx.appcompat.widget.Toolbar
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
 import androidx.navigation.ui.setupWithNavController
-import com.ezper.advuts160421030.util.createNotificationChannel
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var navController: NavController
 
+    companion object {
+        fun logout(activity: Activity) {
+            val shared = activity.packageName
+            val sharedPref: SharedPreferences = activity.getSharedPreferences(shared, Context.MODE_PRIVATE)
+            val editor = sharedPref.edit()
+            editor.remove("KEY_ID")
+            editor.apply()
+        }
+
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-        navController = (supportFragmentManager.findFragmentById(R.id.hostFragment) as NavHostFragment).navController
-        NavigationUI.setupActionBarWithNavController(this, navController, binding.drawerLayout)
-        NavigationUI.setupWithNavController(binding.navView, navController)
+        val view = binding.root
+        setContentView(view)
+
+        navController = (supportFragmentManager.findFragmentById(R.id.navHome) as NavHostFragment).navController
+        val appBarConfig = AppBarConfiguration(setOf(
+            R.id.itemHome,
+            R.id.itemHistory,
+            R.id.itemProfile
+        ))
+        val toolbar = Toolbar(applicationContext)
+//        setSupportActionBar(toolbar)
+
+        NavigationUI.setupActionBarWithNavController(this, navController, appBarConfig)
         binding.bottomNav.setupWithNavController(navController)
 
+        if (LoginActivity.getSharedPref(this) == 0) {
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
     }
 
     override fun onSupportNavigateUp(): Boolean {
-        return NavigationUI.navigateUp(navController, binding.drawerLayout)
-                || super.onSupportNavigateUp()
+        return navController.navigateUp() || super.onSupportNavigateUp()
     }
-
-
 }

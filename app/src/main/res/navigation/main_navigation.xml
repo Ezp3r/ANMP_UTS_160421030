@@ -20,18 +20,6 @@
         android:label="fragment_news_detail"
         tools:layout="@layout/fragment_news_detail">
         <argument
-            android:name="title"
-            app:argType="string"
-            app:nullable="true"/>
-        <argument
-            android:name="author"
-            app:argType="string"
-            app:nullable="true"/>
-        <argument
-            android:name="url"
-            app:argType="string"
-            app:nullable="true" />
-        <argument
             android:name="id"
             app:argType="integer" />
         <action

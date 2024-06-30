@@ -1,6 +1,8 @@
 package com.ezper.advuts160421030.view
 
+import android.app.AlertDialog
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
@@ -10,75 +12,77 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import com.android.volley.Request
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.ezper.advuts160421030.R
 import com.ezper.advuts160421030.databinding.FragmentLoginBinding
 import com.ezper.advuts160421030.databinding.FragmentProfileBinding
+import com.ezper.advuts160421030.model.User
+import com.ezper.advuts160421030.viewmodel.UserViewModel
 import java.time.LocalDateTime
 
-class ProfileFragment : Fragment() {
+class ProfileFragment : Fragment(), UpdateUserClick {
     private lateinit var binding:FragmentProfileBinding
+    private lateinit var viewModel: UserViewModel
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
+//        return inflater.inflate(R.layout.fragment_profile, container, false)
         binding = FragmentProfileBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        var sharedFile = "com.ezper.advuts160421030"
-        var shared: SharedPreferences = this.requireContext().getSharedPreferences(sharedFile, Context.MODE_PRIVATE)
-        var editor: SharedPreferences.Editor = shared.edit()
-        binding.txtChangeFrontName.setText(shared.getString("nama_depan",""))
-        binding.txtChangeBackName.setText(shared.getString("nama_belakang",""))
-        binding.btnChange.setOnClickListener {
-            val q = Volley.newRequestQueue(this.requireContext())
-            val url_target = "http://10.0.2.2/news/update_user.php"
-            val stringRequest = object: StringRequest(
-                Request.Method.POST, url_target,
-                {
-                    Log.d("apiresult", it)
-                    Toast.makeText(this.requireContext(), "Change Successful", Toast.LENGTH_SHORT).show()
-
-                    //RESET
-                    var editor: SharedPreferences.Editor=shared.edit()
-                    editor.putString("nama_depan", binding.txtChangeFrontName.text.toString())
-                    editor.putString("nama_belakang", binding.txtChangeBackName.text.toString())
-                    editor.apply()
-
-                },
-                {
-                    Log.e("apierror", it.printStackTrace().toString())
-                }
-            ) {
-                override fun getParams(): MutableMap<String, String>? {
-                    val params = HashMap<String, String>()
-                    params["nama_depan"] = binding.txtChangeFrontName.text.toString()
-                    params["nama_belakang"] = binding.txtChangeBackName.text.toString()
-                    params["password"] = binding.txtChangePassword.text.toString()
-                    params["username"] = shared.getString("username","").toString()
-                    return params
-                }
+        if (LoginActivity.getSharedPref(requireActivity()) != 0) {
+            viewModel = ViewModelProvider(this).get(UserViewModel::class.java)
+            val shared = activity?.packageName
+            val sharedPref: SharedPreferences = requireActivity().getSharedPreferences(shared, Context.MODE_PRIVATE)
+            val id = sharedPref.getInt("KEY_ID", 0)
+            viewModel.selectUser(id)
+            binding.updateListener = this
+            binding.btnLogout.setOnClickListener {
+                MainActivity.logout(requireActivity())
+                val intent = Intent(activity, MainActivity::class.java)
+                startActivity(intent)
+                activity?.finish()
             }
-            q.add(stringRequest)
+            observeViewModel()
         }
-        binding.btnLogout.setOnClickListener {
-            var sharedFile = "com.ezper.advuts160421030"
-            var shared: SharedPreferences = this.requireContext().getSharedPreferences(sharedFile, Context.MODE_PRIVATE)
-            var editor: SharedPreferences.Editor = shared.edit()
-            editor.putString("username", "")
-            editor.putString("nama_depan", "")
-            editor.putString("nama_belakang", "")
-            val intent = Intent(this.requireContext(), LoginActivity::class.java)
-            editor.apply()
-            startActivity(intent)
-            this.requireActivity().finish()
-        }
+
     }
 
+    fun observeViewModel() {
+        viewModel.userLD.observe(viewLifecycleOwner, Observer {
+            if (it != null) {
+                binding.user = it
+            }
+        })
+    }
+
+    override fun updateUser(v: View, obj: User) {
+        val alert = AlertDialog.Builder(activity)
+        alert.setTitle("Konfirmasi")
+        alert.setMessage("Apakah anda yakin untuk mengubah data akun ini?")
+        alert.setPositiveButton("Ubah", DialogInterface.OnClickListener { dialog, which ->
+            viewModel.update(
+                obj.nama_depan,
+                obj.nama_belakang,
+                obj.password,
+                obj.uuid)
+            alert.setTitle("Informasi")
+            alert.setMessage("Berhasil ubah data")
+            alert.setPositiveButton("OK", DialogInterface.OnClickListener { dialog, which ->  })
+            alert.create().show()
+        })
+        alert.setNegativeButton("Batal", DialogInterface.OnClickListener { dialog, which ->
+        })
+        alert.create().show()
+    }
 }
